@@ -24,10 +24,10 @@
             <span onclick="SetStorage()" class="addBtn" id="addBtn">Add</span>
             <span onclick="EditStorage()" class="editBtn" id="editBtn" hidden>Edit</span>
             <div class="control" id="control" hidden>
-                <button id="backup">Backup</button>
-                <button id="delete">Delete</button>
-                <button id="archive">Archive</button>
-                <button id="show">Show All</button>
+                <button id="backup" onclick="BackUpList()">Backup</button>
+                <button id="delete" onclick="DeleteList()">Delete</button>
+                <button id="archive" onclick="ArchiveList()">Archive</button>
+                <button id="show" onclick="ShowList()">Show All</button>
             </div>
         </div>
         <ul id="myUL">

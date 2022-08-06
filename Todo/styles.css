@@ -73,7 +73,7 @@ ul li:hover {
     clear: both;
 }
 
-input {
+input:not(input[type=checkbox]) {
     margin: 0;
     border: none;
     border-radius: 0;
@@ -82,6 +82,11 @@ input {
     float: left;
     font-size: smaller;
     font-family: cursive;
+}
+
+.select{
+    position: absolute;
+    left: 0;    
 }
 
 .addBtn , .editBtn{

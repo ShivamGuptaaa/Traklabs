@@ -56,9 +56,12 @@ function GetStorage() {
 
 // Function to add li in ul
 function Add_li(id, title, description, date) {
-    if (JSON.parse(localStorage.data).length == 1) {
-        document.getElementById("myUL").innerHTML = "";
-        document.getElementById("control").hidden = false;
+    if (localStorage.data) {
+        let s = JSON.parse(localStorage.data);
+        if (s.length == 1) {
+            document.getElementById("myUL").innerHTML = "";
+            document.getElementById("control").hidden = false;
+        }
     }
     let li = document.createElement("li");
     let titleNode = document.createTextNode(title + "  " + description);
@@ -66,6 +69,13 @@ function Add_li(id, title, description, date) {
     li.setAttribute("id", 'l' + id);
     document.getElementById("myUL").appendChild(li);
     if (id !== 0) {
+        // <input type="checkbox" name="foo" value="bar1"> Bar 1<br/>.
+        let inp = document.createElement("input");
+        inp.type = "checkbox";
+        inp.className = "select";
+        inp.setAttribute("id", 'cb' + id);
+        li.appendChild(inp);
+
         let span2 = document.createElement("SPAN");
         let edit = document.createTextNode("\u270E");
         span2.className = "edit";
@@ -92,9 +102,19 @@ function Add_li(id, title, description, date) {
 
 // Function to Show li list from localStorage
 function ShowList() {
+    let storage = [];
+    if (localStorage.data)
+        storage = JSON.parse(localStorage.data);
+    let deletedData = [];
+    if (localStorage.deletedData)
+        deletedData = JSON.parse(localStorage.deletedData)
+    if (storage.length != 0 || deletedData.length != 0)
+        document.getElementById("control").hidden = false;
     document.getElementById("myUL").innerHTML = "";
     let data = GetStorage();
-    if (data.length !== 0) {
+    if (data.length !== 0 && data) {
+
+        document.getElementById("control").hidden = false;
         data.forEach((item) => {
             Add_li(item.id, item.title, item.description, item.date);
         })
@@ -109,10 +129,15 @@ function DeleteTodo(id) {
     let storage;
     storage = JSON.parse(localStorage.data);
     let indexToRemove = undefined;
+    let deletedData = [];
+    if (localStorage.deletedData) {
+        deletedData = JSON.parse(localStorage.deletedData);
+    }
     for (let i = 0; i < storage.length; i++) {
         let obj = JSON.parse(storage[i]);
         if ('dl' + obj.id == id) {
             indexToRemove = i;
+            deletedData.push(JSON.stringify(obj));
             break;
         }
     }
@@ -120,6 +145,7 @@ function DeleteTodo(id) {
     if (storage.length == 0) {
         document.getElementById("control").hidden = true;
     }
+    localStorage.deletedData = JSON.stringify(deletedData);
     localStorage.data = JSON.stringify(storage);
     ShowList();
 }
@@ -162,8 +188,10 @@ function EditStorage() {
 // to search in localStorage and display results accordingly
 function SearchStorage() {
     let input = document.getElementById("searchInp").value;
-    let storage;
-    storage = JSON.parse(localStorage.data);
+    let storage = [];
+    if(localStorage.data){
+        storage = JSON.parse(localStorage.data);
+    }
     let searchedList = [];
 
     for (let item of storage) {
@@ -195,4 +223,37 @@ function CancelSearch() {
     document.getElementById("searchBtn").hidden = false;
     document.getElementById("searchInp").value = "";
     document.getElementById("cancelBtn").hidden = true;
+}
+
+//handle BackUpList
+function BackUpList() {
+    if (localStorage.deletedData != "") {
+        let deletedData = JSON.parse(localStorage.deletedData);
+        let storage = JSON.parse(localStorage.data);
+
+        for (let item of deletedData) {
+            storage.push(item);
+        }
+        localStorage.data = JSON.stringify(storage);
+        localStorage.deletedData = "";
+        ShowList();
+    }
+    else {
+        alert("No data for backup");
+        return false;
+    }
+}
+
+//handle DeleteList
+function DeleteList() {
+    let checkboxes = document.getElementsByClassName("select");
+    let checkedelements = [];
+    for (const element of checkboxes) {
+        if (element.checked)
+            checkedelements.push(element);
+            // DeleteTodo(element.id.replace('cb', 'dl'));
+    }
+    for(const element of checkedelements)
+        DeleteTodo(element.id.replace('cb', 'dl'));
+
 }
