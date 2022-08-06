@@ -95,20 +95,33 @@ input {
     cursor: pointer;
     transition: 0.3s;
     border-radius: 0;
-    margin-top: -2.3vh;
+    margin-top: -1.3vh;
+    margin-left: 2vw;
+}
+.searchBtn, .cancelBtn{
+    padding: 12px;
+    width: 20%;
+    background: #d9d9d9;
+    color: #555;
+    float: left;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 0;
     margin-left: 2vw;
 }
 
-.addBtn:hover, .editBtn:hover {
+.addBtn:hover, .editBtn:hover , .searchBtn:hover , .cancelSearch:hover{
     background-color: #bbb;
 }
 
 .container {
     margin: auto;
     border: 1vmax solid rgb(165, 229, 165);
-    border-radius: 20px;
+    border-radius: 15px;
     padding: 10px;
-    height: 85vh;
+    height: 88vh;
     width: 90vw;
     background-color: darkgrey;
 }
@@ -116,4 +129,23 @@ input {
 .title {
     color: cornsilk;
     text-align: center;
+}
+
+.control{
+    margin-top: 130px;
+    padding-right: 17vw;
+}
+
+.control button{
+    height: 5vh;
+    margin-right: 2vw;
+    width: 11vw;
+    background: #d9d9d9;
+    color: #555;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    border: none;
+    border-radius: 10px;
 }
