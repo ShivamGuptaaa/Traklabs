@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <title>TODO -NotesWebApp</title>
+
+</head>
+
+<body>
+    <h1 class="title">TODO</h1>
+    <div class="container">
+        <div id="myDIV" class="header">
+            <input type="text" id="input" placeholder="Title...">
+            <input type="text" id="description" placeholder="Description...">
+            <span onclick="SetStorage()" class="addBtn" id="addBtn">Add</span>
+            <span onclick="EditStorage()" class="editBtn" id="editBtn" hidden>Edit</span>
+        </div>
+
+        <ul id="myUL">
+        </ul>
+
+    </div>
+    <script src="./script.js"></script>
+</body>
+
+</html>
