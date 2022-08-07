@@ -55,7 +55,7 @@ function GetStorage() {
 }
 
 // Function to add li in ul
-function Add_li(id, title, description, date) {
+function Add_li(id, title, description, date,archived = false) {
     if (localStorage.data) {
         let s = JSON.parse(localStorage.data);
         if (s.length == 1) {
@@ -65,6 +65,9 @@ function Add_li(id, title, description, date) {
     }
     let li = document.createElement("li");
     let titleNode = document.createTextNode(title + "  " + description);
+    if(archived){
+        li.className = "archived";
+    }
     li.appendChild(titleNode);
     li.setAttribute("id", 'l' + id);
     document.getElementById("myUL").appendChild(li);
@@ -120,7 +123,7 @@ function ShowList() {
         })
     }
     else {
-        Add_li(0, "Nothing To Show!", 'Use "Add Notes" to add note', "");
+        Add_li(0, "Nothing To Show!", 'Use "Add" to add note', "");
     }
 }
 
@@ -189,7 +192,7 @@ function EditStorage() {
 function SearchStorage() {
     let input = document.getElementById("searchInp").value;
     let storage = [];
-    if(localStorage.data){
+    if (localStorage.data) {
         storage = JSON.parse(localStorage.data);
     }
     let searchedList = [];
@@ -246,14 +249,66 @@ function BackUpList() {
 
 //handle DeleteList
 function DeleteList() {
+    let checkedelements = GetCheckedElements();
+    if(checkedelements){
+    for (const element of checkedelements)
+        DeleteTodo(element.id.replace('cb', 'dl'));
+    }
+    else{
+        alert("None of the Notes selected!");
+    }
+}
+
+// handle Archive
+function ArchiveList() {
+    let checkedelements = GetCheckedElements();
+    if(checkedelements){
+    let storage;
+    storage = JSON.parse(localStorage.data);
+    let indexToRemove = undefined;
+    let archivedData = [];
+    for (const element of checkedelements) {
+        if (localStorage.archivedData) {
+            archivedData = JSON.parse(localStorage.archivedData);
+        }
+        for (let i = 0; i < storage.length; i++) {
+            let obj = JSON.parse(storage[i]);
+            if (obj.id == element.id.replace('cb', '')) {
+                indexToRemove = i;
+                archivedData.push(storage[i]);
+                break;
+            }
+        }
+        storage.splice(indexToRemove, 1);
+        localStorage.archivedData = JSON.stringify(archivedData);
+        localStorage.data = JSON.stringify(storage);
+        ShowList();
+    }
+}
+else{
+    alert("None of the Notes selected!");
+}
+}
+
+//handle ShowArchive
+// function ShowArchive(){
+//     if(localStorage.archivedData){
+//         let archivedData = JSON.parse(localStorage.archivedData);
+//         for(const data of archivedData){
+//             Add_li(data.id,data.title,data.description,data.date,true);
+//         }
+//     }
+// }
+
+
+//Get Checked Elements
+function GetCheckedElements() {
     let checkboxes = document.getElementsByClassName("select");
     let checkedelements = [];
     for (const element of checkboxes) {
         if (element.checked)
             checkedelements.push(element);
-            // DeleteTodo(element.id.replace('cb', 'dl'));
     }
-    for(const element of checkedelements)
-        DeleteTodo(element.id.replace('cb', 'dl'));
-
+    return checkedelements.length !== 0 ? checkedelements : false;
 }
+

@@ -126,7 +126,8 @@ input:not(input[type=checkbox]) {
     border: 1vmax solid rgb(165, 229, 165);
     border-radius: 15px;
     padding: 10px;
-    height: 88vh;
+    height: auto;
+    min-height: 88vh;
     width: 90vw;
     background-color: darkgrey;
 }
