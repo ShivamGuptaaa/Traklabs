@@ -1,6 +1,7 @@
 class Todo {
     static idCounter = localStorage.maxId ? localStorage.maxId : 0;
     static editItemIndex;
+    static editItemIsArchived = false;
     constructor(title, description) {
         this.id = ++Todo.idCounter;
         this.title = title;
@@ -55,7 +56,7 @@ function GetStorage() {
 }
 
 // Function to add li in ul
-function Add_li(id, title, description, date,archived = false) {
+function Add_li(id, title, description, date, archived = false) {
     if (localStorage.data) {
         let s = JSON.parse(localStorage.data);
         if (s.length == 1) {
@@ -65,12 +66,14 @@ function Add_li(id, title, description, date,archived = false) {
     }
     let li = document.createElement("li");
     let titleNode = document.createTextNode(title + "  " + description);
-    if(archived){
-        li.className = "archived";
-    }
     li.appendChild(titleNode);
     li.setAttribute("id", 'l' + id);
-    document.getElementById("myUL").appendChild(li);
+    if (archived) {
+        li.className = "archived";
+        document.getElementById("archivedUL").appendChild(li);
+    } else {
+        document.getElementById("myUL").appendChild(li);
+    }
     if (id !== 0) {
         // <input type="checkbox" name="foo" value="bar1"> Bar 1<br/>.
         let inp = document.createElement("input");
@@ -83,7 +86,10 @@ function Add_li(id, title, description, date,archived = false) {
         let edit = document.createTextNode("\u270E");
         span2.className = "edit";
         span2.setAttribute("id", 'e' + id);
-        span2.setAttribute("onClick", "EditTodo(this.id)")
+        if (archived)
+            span2.setAttribute("onClick", "EditTodo(this.id,true)")
+        else
+            span2.setAttribute("onClick", "EditTodo(this.id)")
         span2.appendChild(edit);
         li.appendChild(span2);
 
@@ -91,7 +97,10 @@ function Add_li(id, title, description, date,archived = false) {
         let txt = document.createTextNode("\u00D7"); //  \u270E
         span.className = "close";
         span.setAttribute("id", 'dl' + id);
-        span.setAttribute("onClick", "DeleteTodo(this.id)")
+        if (archived)
+            span.setAttribute("onClick", "DeleteTodo(this.id,true)")
+        else
+            span.setAttribute("onClick", "DeleteTodo(this.id)")
         span.appendChild(txt);
         li.appendChild(span);
 
@@ -128,9 +137,9 @@ function ShowList() {
 }
 
 //Funcion to delete a entity from localStorage
-function DeleteTodo(id) {
+function DeleteTodo(id, archived = false) {
     let storage;
-    storage = JSON.parse(localStorage.data);
+    storage = archived ? JSON.parse(localStorage.archivedData) : JSON.parse(localStorage.data);
     let indexToRemove = undefined;
     let deletedData = [];
     if (localStorage.deletedData) {
@@ -148,15 +157,28 @@ function DeleteTodo(id) {
     if (storage.length == 0) {
         document.getElementById("control").hidden = true;
     }
-    localStorage.deletedData = JSON.stringify(deletedData);
-    localStorage.data = JSON.stringify(storage);
-    ShowList();
+    if (archived) {
+        localStorage.archivedData = JSON.stringify(storage);
+        HideArchive();
+        ShowArchive();
+    }
+    else {
+        localStorage.deletedData = JSON.stringify(deletedData);
+        localStorage.data = JSON.stringify(storage);
+        ShowList();
+    }
 }
 
 //Funcion to edit a entity from localStorage
-function EditTodo(id) {
+function EditTodo(id, archived = false) {
     let storage;
-    storage = JSON.parse(localStorage.data);
+    if (archived) {
+        storage = JSON.parse(localStorage.archivedData);
+        Todo.editItemIsArchived = true;
+    }
+    else {
+        storage = JSON.parse(localStorage.data);
+    }
     for (let i = 0; i < storage.length; i++) {
         let obj = JSON.parse(storage[i]);
         if ('e' + obj.id == id) {
@@ -174,18 +196,26 @@ function EditTodo(id) {
 //function to edit localStorage data
 function EditStorage() {
     let storage;
-    storage = JSON.parse(localStorage.data);
+    storage = Todo.editItemIsArchived ? JSON.parse(localStorage.archivedData) : JSON.parse(localStorage.data);
     let editObj = JSON.parse(storage[Todo.indexToEdit]);
     editObj.title = document.getElementById("input").value;
     editObj.description = document.getElementById("description").value;
     editObj.date = GetCurrentDateTime();
     storage[Todo.indexToEdit] = JSON.stringify(editObj);
-    localStorage.data = JSON.stringify(storage);
-    ShowList();
+    if (Todo.editItemIsArchived) {
+        localStorage.archivedData = JSON.stringify(storage);
+        HideArchive();
+        ShowArchive();
+    }
+    else {
+        localStorage.data = JSON.stringify(storage);
+        ShowList();
+    }
     document.getElementById("editBtn").setAttribute("hidden", "");
     document.getElementById("addBtn").removeAttribute("hidden");
     document.getElementById("input").value = "";
     document.getElementById("description").value = "";
+    Todo.editItemIsArchived = false;
 }
 
 // to search in localStorage and display results accordingly
@@ -250,11 +280,11 @@ function BackUpList() {
 //handle DeleteList
 function DeleteList() {
     let checkedelements = GetCheckedElements();
-    if(checkedelements){
-    for (const element of checkedelements)
-        DeleteTodo(element.id.replace('cb', 'dl'));
+    if (checkedelements) {
+        for (const element of checkedelements)
+            DeleteTodo(element.id.replace('cb', 'dl'));
     }
-    else{
+    else {
         alert("None of the Notes selected!");
     }
 }
@@ -262,44 +292,62 @@ function DeleteList() {
 // handle Archive
 function ArchiveList() {
     let checkedelements = GetCheckedElements();
-    if(checkedelements){
-    let storage;
-    storage = JSON.parse(localStorage.data);
-    let indexToRemove = undefined;
-    let archivedData = [];
-    for (const element of checkedelements) {
-        if (localStorage.archivedData) {
-            archivedData = JSON.parse(localStorage.archivedData);
-        }
-        for (let i = 0; i < storage.length; i++) {
-            let obj = JSON.parse(storage[i]);
-            if (obj.id == element.id.replace('cb', '')) {
-                indexToRemove = i;
-                archivedData.push(storage[i]);
-                break;
+    if (checkedelements) {
+        let storage;
+        storage = JSON.parse(localStorage.data);
+        let indexToRemove = undefined;
+        let archivedData = [];
+        for (const element of checkedelements) {
+            if (localStorage.archivedData) {
+                archivedData = JSON.parse(localStorage.archivedData);
             }
+            for (let i = 0; i < storage.length; i++) {
+                let obj = JSON.parse(storage[i]);
+                if (obj.id == element.id.replace('cb', '')) {
+                    indexToRemove = i;
+                    archivedData.push(storage[i]);
+                    break;
+                }
+            }
+            storage.splice(indexToRemove, 1);
+            localStorage.archivedData = JSON.stringify(archivedData);
+            localStorage.data = JSON.stringify(storage);
+            ShowList();
         }
-        storage.splice(indexToRemove, 1);
-        localStorage.archivedData = JSON.stringify(archivedData);
-        localStorage.data = JSON.stringify(storage);
-        ShowList();
+    }
+    else {
+        alert("None of the Notes selected!");
     }
 }
-else{
-    alert("None of the Notes selected!");
-}
+
+// handle ShowArchive
+function ShowArchive() {
+    if (localStorage.archivedData) {
+        let archivedData = JSON.parse(localStorage.archivedData);
+        let li = document.createElement("li");
+        let title = document.createTextNode("ARCHIVED LIST");
+        li.appendChild(title);
+        li.className = "archived";
+        li.style.textAlign = "center";
+        document.getElementById("archivedUL").appendChild(li);
+        for (let data of archivedData) {
+            let obj = JSON.parse(data);
+            Add_li(obj.id, obj.title, obj.description, obj.date, true);
+        }
+        document.getElementById("show").hidden = true;
+        document.getElementById("hide").hidden = false;
+
+    }
+    else {
+        alert("No archived data!");
+    }
 }
 
-//handle ShowArchive
-// function ShowArchive(){
-//     if(localStorage.archivedData){
-//         let archivedData = JSON.parse(localStorage.archivedData);
-//         for(const data of archivedData){
-//             Add_li(data.id,data.title,data.description,data.date,true);
-//         }
-//     }
-// }
-
+function HideArchive() {
+    document.getElementById("archivedUL").innerHTML = '';
+    document.getElementById("hide").hidden = true;
+    document.getElementById("show").hidden = false;
+}
 
 //Get Checked Elements
 function GetCheckedElements() {

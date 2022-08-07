@@ -22,15 +22,18 @@ ul li {
     background: #eee;
     font-size: 18px;
     transition: 0.2s;
-
 }
 
-ul li:nth-child(odd) {
+ul li:nth-child(odd):not(.archived) {
     background: #f9f9f9;
 }
 
 ul li:hover {
     background: #ddd;
+}
+
+.archived{
+    background-color: lightpink;
 }
 
 .close {
